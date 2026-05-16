@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BlitzCheckers ⚡
 
-## Getting Started
+**Современная веб-платформа для русских шашек** — не просто доска, а продукт для тренировки, быстрых дуэлей и возврата игроков.
 
-First, run the development server:
+## Для кого
+
+- Любителям шашек, которые хотят играть **быстро** (режим блиц 3 минуты)
+- Новичкам — **подсказки ходов** и **AI Coach** после партии
+- Игрокам, которые соревнуются в **городском рейтинге** (например, топ Алматы)
+
+## Что сделано
+
+| Уровень ТЗ | Реализация |
+|------------|------------|
+| Средний | Полные правила русских шашек, игра вдвоём на одном экране |
+| Сильный | ИИ (3 сложности), LocalStorage, тёмная/светлая тема, подсказки, адаптив |
+| Великий | P2P-мультиплеер по ссылке, AI Coach, лидерборд по городам, Upgrade to Pro |
+
+### Уникальная ниша
+
+**BlitzCheckers** — шашки для **быстрых 3-минутных дуэлей** и осознанного роста: таймер, рейтинг, разбор ошибок после игры.
+
+### Функции
+
+- ✅ Русские шашки: диагонали, обязательные взятия, максимум фигур, дамки «летают»
+- ✅ Режимы: локально, против ИИ, блиц, онлайн (PeerJS WebRTC)
+- ✅ AI Coach: пропущенные взятия, неполные серии, риск дамки соперника
+- ✅ Профиль, история партий, рейтинг по городу
+- ✅ Кнопка **Upgrade to Pro** (демо-монетизация, готово к Stripe)
+
+## Стек
+
+- **Next.js 16** + React 19 + TypeScript
+- **Tailwind CSS 4**
+- **Zustand** — состояние игры
+- **PeerJS** — P2P-мультиплеер без своего сервера
+- **LocalStorage** — прогресс, тема, история
+
+## Запуск
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Откройте [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Сборка production:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Деплой
 
-To learn more about Next.js, take a look at the following resources:
+- **Vercel**: импортируйте репозиторий → Deploy
+- **GitHub**: создайте репозиторий и запушьте код
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Сдача работы
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Рабочий проект: URL после деплоя (Vercel)
+2. GitHub: ссылка на репозиторий
+3. Форма: https://nfactorialschool.typeform.com/to/HYVeKeEx
 
-## Deploy on Vercel
+## Структура
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+  lib/game/     # движок правил, ИИ, coach
+  store/        # Zustand
+  components/   # UI
+  hooks/        # тема, P2P
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+Сделано с ❤️ как прототип стартапа: играть интересно, учиться после партии, возвращаться за рейтингом в своём городе.
