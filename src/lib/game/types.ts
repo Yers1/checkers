@@ -20,15 +20,22 @@ export interface GameMove {
   from: Position;
   to: Position;
   captures: Position[];
-  /** Full path including intermediate landing squares for multi-jumps */
   path: Position[];
 }
 
-export type GameMode = "local" | "ai" | "blitz" | "online";
+export type GameMode =
+  | "local"
+  | "ai"
+  | "blitz"
+  | "online"
+  | "puzzle"
+  | "daily";
 
 export type Difficulty = "easy" | "medium" | "hard";
 
 export type GameStatus = "playing" | "white-won" | "black-won" | "draw";
+
+export type BoardSkin = "classic" | "neon" | "marble" | "midnight";
 
 export interface MoveRecord {
   move: GameMove;
@@ -50,6 +57,8 @@ export interface GameState {
   hintsEnabled: boolean;
   blitzSeconds: { white: number; black: number };
   blitzActive: boolean;
+  puzzleId?: string;
+  dailyDate?: string;
 }
 
 export interface PlayerProfile {
@@ -60,12 +69,36 @@ export interface PlayerProfile {
   losses: number;
   rating: number;
   isPro: boolean;
+  streak: number;
+  bestStreak: number;
+  puzzlesSolved: number;
+  gamesPlayed: number;
+  unlockedAchievements: string[];
+  boardSkin: BoardSkin;
 }
 
 export interface CoachInsight {
-  type: "missed-capture" | "blunder" | "good" | "promotion-risk" | "double-capture";
+  type:
+    | "missed-capture"
+    | "blunder"
+    | "good"
+    | "promotion-risk"
+    | "double-capture";
   moveIndex: number;
   player: Player;
   message: string;
   severity: "info" | "warning" | "critical";
+}
+
+export interface UiSettings {
+  soundEnabled: boolean;
+  boardFlipped: boolean;
+  zenMode: boolean;
+  particlesEnabled: boolean;
+}
+
+export interface LastMoveHighlight {
+  from: Position;
+  to: Position;
+  captures: Position[];
 }

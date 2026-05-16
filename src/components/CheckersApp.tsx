@@ -5,10 +5,11 @@ import { useTheme } from "@/hooks/useTheme";
 import { useGameStore } from "@/store/gameStore";
 import { Sidebar } from "./Sidebar";
 import { GamePanel } from "./GamePanel";
+import { HeroBanner } from "./HeroBanner";
 
 export function CheckersApp() {
   const { theme, toggle } = useTheme();
-  const { init, tickBlitz, game } = useGameStore();
+  const { init, tickBlitz, game, ui } = useGameStore();
 
   useEffect(() => {
     init();
@@ -23,7 +24,10 @@ export function CheckersApp() {
   return (
     <div className="app-shell">
       <Sidebar onThemeToggle={toggle} theme={theme} />
-      <GamePanel />
+      <div className="main-column">
+        {!ui.zenMode && <HeroBanner />}
+        <GamePanel />
+      </div>
     </div>
   );
 }

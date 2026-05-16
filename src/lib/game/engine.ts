@@ -1,6 +1,5 @@
 import { cloneBoard, getPiece, promoteIfNeeded, setPiece } from "./board";
 import { getAllLegalMoves, getGameStatus } from "./moves";
-// getAllLegalMoves used in createNewGame
 import type { Board, GameMove, GameState, MoveRecord, Player } from "./types";
 import { createInitialBoard } from "./board";
 import { opponent } from "./board";
@@ -26,20 +25,52 @@ export function createNewGame(
   difficulty: GameState["difficulty"] = "medium",
 ): GameState {
   const board = createInitialBoard();
+  return buildGameState(board, "white", mode, difficulty);
+}
+
+export function createCustomGame(
+  board: Board,
+  currentPlayer: Player,
+  mode: GameState["mode"],
+  extra?: Partial<GameState>,
+): GameState {
+  return {
+    ...buildGameState(board, currentPlayer, mode, "medium"),
+    ...extra,
+    legalMoves: getAllLegalMoves(board, currentPlayer),
+  };
+}
+
+function buildGameState(
+  board: Board,
+  currentPlayer: Player,
+  mode: GameState["mode"],
+  difficulty: GameState["difficulty"],
+): GameState {
   return {
     board,
-    currentPlayer: "white",
+    currentPlayer,
     status: "playing",
     selected: null,
-    legalMoves: getAllLegalMoves(board, "white"),
+    legalMoves: getAllLegalMoves(board, currentPlayer),
     mustContinueFrom: null,
     history: [],
     mode,
     difficulty,
-    hintsEnabled: true,
+    hintsEnabled: mode !== "puzzle",
     blitzSeconds: { white: 180, black: 180 },
     blitzActive: mode === "blitz",
   };
+}
+
+export function boardAtMoveIndex(state: GameState, index: number): Board {
+  if (index < 0) return state.board;
+  let board = JSON.parse(state.history[0]?.boardBefore ?? "null") as Board | null;
+  if (!board) return state.board;
+  for (let i = 0; i <= index && i < state.history.length; i++) {
+    board = applyMove(board, state.history[i].move);
+  }
+  return board;
 }
 
 export function refreshLegalMoves(state: GameState): GameMove[] {

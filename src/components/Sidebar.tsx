@@ -1,15 +1,21 @@
 "use client";
 
-import { getCityLeaderboard, loadGameHistory } from "@/lib/storage";
+import { motion } from "framer-motion";
+import { ACHIEVEMENTS } from "@/lib/achievements";
+import { getAllPuzzles } from "@/lib/game/puzzles";
+import { getCityLeaderboard, isDailyChallengeDone, loadGameHistory } from "@/lib/storage";
 import type { Difficulty, GameMode } from "@/lib/game/types";
 import { useGameStore } from "@/store/gameStore";
 import { useEffect, useState } from "react";
+import { SkinPicker } from "./SkinPicker";
 
-const MODES: { id: GameMode; label: string; desc: string }[] = [
+const MODES: { id: GameMode; label: string; desc: string; badge?: string }[] = [
+  { id: "ai", label: "Против ИИ", desc: "Minimax AI", badge: "HOT" },
+  { id: "blitz", label: "Блиц 3 мин", desc: "Быстрые дуэли", badge: "⚡" },
+  { id: "puzzle", label: "Тактика", desc: "5 комбо-задач", badge: "NEW" },
+  { id: "daily", label: "Челлендж дня", desc: "Новая каждый день" },
   { id: "local", label: "Вдвоём", desc: "Один экран" },
-  { id: "ai", label: "Против ИИ", desc: "3 уровня" },
-  { id: "blitz", label: "Блиц 3 мин", desc: "Быстрые дуэли" },
-  { id: "online", label: "Онлайн", desc: "По ссылке P2P" },
+  { id: "online", label: "Онлайн P2P", desc: "По ссылке" },
 ];
 
 interface Props {
@@ -21,45 +27,74 @@ export function Sidebar({ onThemeToggle, theme }: Props) {
   const {
     game,
     profile,
+    ui,
     newGame,
     setDifficulty,
     toggleHints,
     updateProfile,
     setShowProModal,
+    setBoardSkin,
+    toggleUi,
+    startPuzzle,
   } = useGameStore();
 
   const [history, setHistory] = useState<ReturnType<typeof loadGameHistory>>([]);
   const cityBoard = getCityLeaderboard(profile.city).slice(0, 5);
+  const dailyDone = isDailyChallengeDone();
+  const puzzles = getAllPuzzles();
 
   useEffect(() => {
     setHistory(loadGameHistory());
-  }, [game.status, game.history.length]);
+    document.documentElement.setAttribute("data-skin", profile.boardSkin);
+  }, [game.status, game.history.length, profile.boardSkin]);
 
   return (
     <aside className="sidebar">
-      <div className="brand">
-        <span className="brand-icon">⚡</span>
+      <motion.div
+        className="brand"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+      >
+        <span className="brand-icon pulse">⚡</span>
         <div>
           <h1>BlitzCheckers</h1>
-          <p>Русские шашки · тренировка и дуэли</p>
+          <p>Умные шашки нового поколения</p>
         </div>
-      </div>
+      </motion.div>
 
       <section className="panel">
-        <h2>Режим</h2>
-        <div className="mode-grid">
-          {MODES.map((m) => (
-            <button
+        <h2>Режим игры</h2>
+        <div className="mode-grid extended">
+          {MODES.map((m, i) => (
+            <motion.button
               key={m.id}
               type="button"
               className={game.mode === m.id ? "mode-btn active" : "mode-btn"}
               onClick={() => newGame(m.id, game.difficulty)}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
+              {m.badge && <span className="mode-badge">{m.badge}</span>}
               <strong>{m.label}</strong>
               <span>{m.desc}</span>
-            </button>
+              {m.id === "daily" && dailyDone && (
+                <span className="done-tag">✓ сегодня</span>
+              )}
+            </motion.button>
           ))}
         </div>
+      </section>
+
+      <section className="panel">
+        <h2>Скин доски</h2>
+        <SkinPicker
+          current={profile.boardSkin}
+          isPro={profile.isPro}
+          onSelect={setBoardSkin}
+        />
       </section>
 
       {game.mode === "ai" && (
@@ -80,6 +115,23 @@ export function Sidebar({ onThemeToggle, theme }: Props) {
         </section>
       )}
 
+      <section className="panel">
+        <h2>Тактические задачи</h2>
+        <ul className="puzzle-list">
+          {puzzles.map((p) => (
+            <li key={p.id}>
+              <button
+                type="button"
+                className="puzzle-link"
+                onClick={() => startPuzzle(p.id)}
+              >
+                {"⭐".repeat(p.difficulty)} {p.title}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section className="panel profile-panel">
         <h2>Профиль</h2>
         <label>
@@ -97,10 +149,31 @@ export function Sidebar({ onThemeToggle, theme }: Props) {
           />
         </label>
         <div className="stats-row">
-          <span>Рейтинг {profile.rating}</span>
-          <span>Побед {profile.wins}</span>
+          <span>⭐ {profile.rating}</span>
+          <span>🏆 {profile.wins}</span>
+          <span>🧩 {profile.puzzlesSolved}</span>
+          <span>🔥 {profile.streak}</span>
         </div>
         {profile.isPro && <span className="pro-badge">PRO</span>}
+      </section>
+
+      <section className="panel">
+        <h2>Достижения · {profile.unlockedAchievements.length}/{ACHIEVEMENTS.length}</h2>
+        <motion.div className="ach-grid">
+          {ACHIEVEMENTS.map((a) => (
+            <span
+              key={a.id}
+              className={
+                profile.unlockedAchievements.includes(a.id)
+                  ? "ach unlocked"
+                  : "ach locked"
+              }
+              title={a.description}
+            >
+              {a.icon}
+            </span>
+          ))}
+        </motion.div>
       </section>
 
       <section className="panel">
@@ -131,13 +204,22 @@ export function Sidebar({ onThemeToggle, theme }: Props) {
 
       <div className="sidebar-actions">
         <button type="button" className="btn ghost" onClick={toggleHints}>
-          {game.hintsEnabled ? "Скрыть подсказки" : "Показать подсказки"}
+          {game.hintsEnabled ? "💡 Подсказки вкл" : "Подсказки выкл"}
+        </button>
+        <button type="button" className="btn ghost" onClick={() => toggleUi("soundEnabled")}>
+          {ui.soundEnabled ? "🔊 Звук" : "🔇 Звук"}
+        </button>
+        <button type="button" className="btn ghost" onClick={() => toggleUi("boardFlipped")}>
+          🔄 Перевернуть доску
+        </button>
+        <button type="button" className="btn ghost" onClick={() => toggleUi("zenMode")}>
+          {ui.zenMode ? "UI вкл" : "🧘 Zen-режим"}
         </button>
         <button type="button" className="btn ghost" onClick={onThemeToggle}>
           {theme === "dark" ? "☀️ Светлая" : "🌙 Тёмная"}
         </button>
         <button type="button" className="btn pro" onClick={() => setShowProModal(true)}>
-          Upgrade to Pro
+          💎 Upgrade to Pro
         </button>
       </div>
     </aside>

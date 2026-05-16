@@ -1,9 +1,12 @@
-import type { GameState, PlayerProfile } from "./game/types";
+import type { BoardSkin, GameState, PlayerProfile } from "./game/types";
+import type { UiSettings } from "./game/types";
 
 const PROFILE_KEY = "checkers-profile";
 const HISTORY_KEY = "checkers-game-history";
 const THEME_KEY = "checkers-theme";
 const ACTIVE_GAME_KEY = "checkers-active-game";
+const UI_KEY = "checkers-ui";
+const DAILY_KEY = "checkers-daily-done";
 
 export type Theme = "light" | "dark";
 
@@ -16,10 +19,15 @@ export interface SavedGameSummary {
   durationSec: number;
 }
 
+const DEFAULT_UI: UiSettings = {
+  soundEnabled: true,
+  boardFlipped: false,
+  zenMode: false,
+  particlesEnabled: true,
+};
+
 export function loadProfile(): PlayerProfile {
-  if (typeof window === "undefined") {
-    return defaultProfile();
-  }
+  if (typeof window === "undefined") return defaultProfile();
   try {
     const raw = localStorage.getItem(PROFILE_KEY);
     if (!raw) return defaultProfile();
@@ -42,7 +50,38 @@ function defaultProfile(): PlayerProfile {
     losses: 0,
     rating: 1000,
     isPro: false,
+    streak: 0,
+    bestStreak: 0,
+    puzzlesSolved: 0,
+    gamesPlayed: 0,
+    unlockedAchievements: [],
+    boardSkin: "classic",
   };
+}
+
+export function loadUiSettings(): UiSettings {
+  if (typeof window === "undefined") return DEFAULT_UI;
+  try {
+    const raw = localStorage.getItem(UI_KEY);
+    return raw ? { ...DEFAULT_UI, ...JSON.parse(raw) } : DEFAULT_UI;
+  } catch {
+    return DEFAULT_UI;
+  }
+}
+
+export function saveUiSettings(settings: UiSettings): void {
+  localStorage.setItem(UI_KEY, JSON.stringify(settings));
+}
+
+export function isDailyChallengeDone(): boolean {
+  if (typeof window === "undefined") return false;
+  const day = new Date().toISOString().slice(0, 10);
+  return localStorage.getItem(DAILY_KEY) === day;
+}
+
+export function markDailyChallengeDone(): void {
+  const day = new Date().toISOString().slice(0, 10);
+  localStorage.setItem(DAILY_KEY, day);
 }
 
 export function loadTheme(): Theme {
@@ -133,4 +172,9 @@ export function getCityLeaderboard(city: string): LeaderboardEntry[] {
   return loadLeaderboard()
     .filter((e) => e.city.toLowerCase() === city.toLowerCase())
     .sort((a, b) => b.rating - a.rating);
+}
+
+export function saveBoardSkin(skin: BoardSkin): void {
+  const p = loadProfile();
+  saveProfile({ ...p, boardSkin: skin });
 }
