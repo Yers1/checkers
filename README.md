@@ -33,26 +33,7 @@
 Next.js 16 · React 19 · TypeScript · Tailwind 4 · Zustand · Framer Motion · PeerJS · canvas-confetti
 
 ## Запуск
+https://checkers-teal.vercel.app/
 
-```bash
-npm install
-npm run dev
-```
 
-[http://localhost:3000](http://localhost:3000)
-
-## Деплой
-
-**Vercel:** Import → `Yers1/checkers` → Deploy
-
-## Репозиторий
-
-https://github.com/Yers1/checkers
-
-## Сдача
-
-Форма: https://nfactorialschool.typeform.com/to/HYVeKeEx
-
----
-
-Сделано как **прототип стартапа**: играть интересно, учиться после партии, возвращаться за рейтингом в своём городе.
+Играть интересно, учиться после партии, возвращаться за рейтингом в своём городе.
